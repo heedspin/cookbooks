@@ -32,9 +32,14 @@ include_recipe "rails::logrotate"
   end
 end
 
+directory node[:rails][:db_directory] do
+  action :create
+  recursive true
+end
+
 case node[:rails][:db_adapter]
 when 'mysql'
-  template "#{node[:app][:root_dir]}/config/database.yml" do
+  template "#{node[:rails][:db_directory]}/config/database.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:ubuntu][:database][:fqdn], 
               :port          => node[:mysql][:server_port],
@@ -44,7 +49,7 @@ when 'mysql'
     mode 0644
   end
 when 'mongoid'
-  template "#{node[:app][:root_dir]}/config/mongoid.yml" do
+  template "#{node[:rails][:db_directory]}/config/mongoid.yml" do
     variables :environment   => node[:rails][:environment],
               :host          => node[:mongodb][:bind_address], 
               :port          => node[:mongodb][:port],
