@@ -45,44 +45,44 @@ end
 ###
 
 # General settings
-default[:apache][:listen_ports] = "80"#[ "80","443" ] Until Chef 0.9 arrays are merged here and not overwritten, see http://tickets.opscode.com/browse/CHEF-838
-default[:apache][:contact] = "ops@example.com"
-default[:apache][:timeout] = 300
-default[:apache][:keepalive] = "On"
-default[:apache][:keepaliverequests] = 100
-default[:apache][:keepalivetimeout] = 5
+default_unless[:apache][:listen_ports] = "80"#[ "80","443" ] Until Chef 0.9 arrays are merged here and not overwritten, see http://tickets.opscode.com/browse/CHEF-838
+default_unless[:apache][:contact] = "ops@example.com"
+default_unless[:apache][:timeout] = 300
+default_unless[:apache][:keepalive] = "On"
+default_unless[:apache][:keepaliverequests] = 100
+default_unless[:apache][:keepalivetimeout] = 5
 
 # Security
-default[:apache][:servertokens] = "Prod"
-default[:apache][:serversignature] = "On"
-default[:apache][:traceenable] = "On"
+default_unless[:apache][:servertokens] = "Prod"
+default_unless[:apache][:serversignature] = "On"
+default_unless[:apache][:traceenable] = "On"
 
 # mod_auth_openids
-default[:apache][:allowed_openids] = Array.new
+default_unless[:apache][:allowed_openids] = Array.new
 
 # Prefork Attributes
-default[:apache][:prefork][:startservers] = 16
-default[:apache][:prefork][:minspareservers] = 16
-default[:apache][:prefork][:maxspareservers] = 32
-default[:apache][:prefork][:serverlimit] = 400
-default[:apache][:prefork][:maxclients] = 400
-default[:apache][:prefork][:maxrequestsperchild] = 10000
+default_unless[:apache][:prefork][:startservers] = 16
+default_unless[:apache][:prefork][:minspareservers] = 16
+default_unless[:apache][:prefork][:maxspareservers] = 32
+default_unless[:apache][:prefork][:serverlimit] = 400
+default_unless[:apache][:prefork][:maxclients] = 400
+default_unless[:apache][:prefork][:maxrequestsperchild] = 10000
 
 # Worker Attributes
-default[:apache][:worker][:startservers] = 4
-default[:apache][:worker][:maxclients] = 1024
-default[:apache][:worker][:minsparethreads] = 64
-default[:apache][:worker][:maxsparethreads] = 192
-default[:apache][:worker][:threadsperchild] = 64
-default[:apache][:worker][:maxrequestsperchild] = 0
+default_unless[:apache][:worker][:startservers] = 4
+default_unless[:apache][:worker][:maxclients] = 1024
+default_unless[:apache][:worker][:minsparethreads] = 64
+default_unless[:apache][:worker][:maxsparethreads] = 192
+default_unless[:apache][:worker][:threadsperchild] = 64
+default_unless[:apache][:worker][:maxrequestsperchild] = 0
 
 # Web App Attributes
-default[:apache][:server_name] = ""  
-default[:apache][:server_aliases] = ""
-default[:apache][:docroot] = "/var/www"
-default[:apache][:name] = "site"
-default[:apache][:vhost_port] = "80"
+default_unless[:apache][:server_name] = ""  
+default_unless[:apache][:server_aliases] = ""
+default_unless[:apache][:docroot] = "/var/www"
+default_unless[:apache][:name] = "site"
+default_unless[:apache][:vhost_port] = "80"
 
 # Log rotation
-default[:apache][:logrotate][:interval] = 'daily'
-default[:apache][:logrotate][:keep_for] = '7'
+default_unless[:apache][:logrotate][:interval] = 'daily'
+default_unless[:apache][:logrotate][:keep_for] = '7'
