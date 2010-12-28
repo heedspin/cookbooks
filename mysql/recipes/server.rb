@@ -50,8 +50,16 @@ when "debian","ubuntu"
   end
 end
 
-package "mysql-server-5.1" do
-  action :install
+if platform?("ubuntu")
+  if node.platform_version.to_f > 8.04
+    package "mysql-server-5.1" do
+      action :install
+    end
+  else
+    package "mysql-server-5.0" do
+      action :install
+    end
+  end
 end
 
 service "mysql" do
