@@ -27,9 +27,13 @@ end
 # ruby 1.9.2 comes with rubygems 1.3.7 pre-installed
 case node[:rubygems][:version]
 when '1.3.7'
-  package "rubygems" do
-    action :install
-    not_if { system("gem -v | grep -q '1.3.7'") }
+  bash "Update rubygems to 1.3.7" do
+    code <<-EOH
+    sudo gem update --system
+    EOH
+    not_if do
+      system("gem -v | grep -q '1.3.7'")
+    end
   end
 when '1.3.6'
   remote_file "/tmp/rubygems-1.3.6.tgz" do
@@ -45,7 +49,6 @@ when '1.3.6'
     sudo ruby setup.rb
     EOH
     not_if do
-      ::File.exists?("/tmp/rubygems-1.3.6/setup.rb") &&
       system("gem -v | grep -q '1.3.6'")
     end
     ignore_failure true #TODO this isn't respecting 
