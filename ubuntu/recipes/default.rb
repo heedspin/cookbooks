@@ -74,74 +74,82 @@ if node[:ubuntu] && node[:ubuntu][:users] && node[:ubuntu][:users][:mysql]
   end
 end
 
-### DEPLOY ###
-if node[:ubuntu] && node[:ubuntu][:users] && node[:ubuntu][:users][:deploy]
-  group "deploy" do
-    gid 1002
-    not_if "cat /etc/group | grep deploy"
+### USER ACCOUNTS ###
+node[:ubuntu][:users][:accounts].each do |account|
+  group account[:name] do
+    gid account[:gid]
+    not_if "cat /etc/group | grep #{account[:name]}"
   end
   
-  user "deploy" do
-    comment "Deploy User"
-    uid "1002"
-    gid "deploy"
-    home "/home/deploy"
+  user account[:name] do
+    comment "#{account[:name].capitalize} User"
+    uid account[:uid]
+    gid account[:name]
+    home "/home/#{account[:name]}"
     shell "/bin/bash"
     #password "$1$JJsvHslV$szsCjVEroftprNn4JHtDi."
-    not_if do File.directory?("/home/deploy") end
+    not_if do File.directory?("/home/#{account[:name]}") end
   end
 
-  directory "/home/deploy" do
-    owner 'deploy'
-    group 'deploy'
+  directory "/home/#{account[:name]}" do
+    owner account[:name]
+    group account[:name]
     mode 0700
     action :create
   end
 
-  directory "/home/deploy/.ssh" do
-    owner 'deploy'
-    group 'deploy'
+  directory "/home/#{account[:name]}/.ssh" do
+    owner account[:name]
+    group account[:name]
     mode 0700
     recursive true
     action :create
-    not_if do File.directory?("/home/deploy/.ssh") end
+    not_if do File.directory?("/home/#{account[:name]}/.ssh") end
   end
 
-  %w(known_hosts).each do |file|
-    remote_file "/home/deploy/.ssh/#{file}" do
-      source "users/deploy/#{file}"
-      owner 'deploy'
-      group 'deploy'
-      mode 0600
-      action :create
-      not_if do File.exists?("/home/deploy/.ssh/#{file}") end
-    end
+  template "/home/#{account[:name]}/.ssh/known_hosts" do
+    source "users/known_hosts.erb"
+    owner account[:name]
+    group account[:name]
+    variables :known_hosts => account[:known_hosts]
+    mode 0600
+    action :create
+    not_if do File.exists?("/home/#{account[:name]}/.ssh/known_hosts") end
   end
 
-  template "/home/deploy/.ssh/authorized_keys" do
+  template "/home/#{account[:name]}/.ssh/authorized_keys" do
     source "users/authorized_keys.erb"
-    owner 'deploy'
-    group 'deploy'
-    variables :private_key => node[:ubuntu][:users][:deploy][:authorized_keys]
+    owner account[:name]
+    group account[:name]
+    variables :authorized_keys => account[:authorized_keys]
     mode 0600
     action :create
-    not_if do File.exists?("/home/deploy/.ssh/authorized_keys") end
   end
 
-  template "/home/deploy/.ssh/id_rsa" do
+  template "/home/#{account[:name]}/.ssh/id_rsa" do
     source "users/id_rsa.erb"
-    owner 'deploy'
-    group 'deploy'
-    variables :private_key => node[:ubuntu][:users][:deploy][:private_key]
+    owner account[:name]
+    group account[:name]
+    variables :private_key => account[:private_key]
     mode 0600
     action :create
-    not_if do File.exists?("/home/deploy/.ssh/id_rsa") end
+    not_if do File.exists?("/home/#{account[:name]}/.ssh/id_rsa") end
+  end
+  
+  template "/home/#{account[:name]}/.ssh/id_rsa.pub" do
+    source "users/id_rsa.pub.erb"
+    owner account[:name]
+    group account[:name]
+    variables :public_key => account[:public_key]
+    mode 0644
+    action :create
+    not_if do File.exists?("/home/#{account[:name]}/.ssh/id_rsa.pub") end
   end
 
-  # add deploy to sudoers without password required
-  execute "add deploy to sudoers" do
-    command "cp /etc/sudoers /etc/sudoers.bak && echo 'deploy  ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers"
-    not_if "cat /etc/sudoers | grep \"deploy  ALL=(ALL) NOPASSWD:ALL\""
+  # add account to sudoers without password required
+  execute "add #{account[:name]} to sudoers" do
+    command "cp /etc/sudoers /etc/sudoers.bak && echo '#{account[:name]}  ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers"
+    not_if "cat /etc/sudoers | grep \"#{account[:name]}  ALL=(ALL) NOPASSWD:ALL\""
   end
 
 end
@@ -174,7 +182,7 @@ if node[:ec2]
   end
 
   if node[:aws][:ebs][:backup]
-    if node[:mysql]
+    if attribute?(:mysql)
       template "/etc/cron.d/ebs_backup" do
         variables :ebs_volume_id   => node[:aws][:ebs][:database][:volume_id],
                   :mysql_user      => 'root', 
@@ -199,12 +207,12 @@ if node[:ec2]
   
   execute "Get Amazon private key" do
     cwd "/mnt"
-    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:private_key.pem private_key.pem"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.#{node[:app][:url]}:private_key.pem private_key.pem"
   end
   
   execute "Get Amazon x509 cert" do
     cwd "/mnt"
-    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.federalregister.gov:cert.pem cert.pem"
+    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get config.internal.#{node[:app][:url]}:cert.pem cert.pem"
   end
 
   execute "add private key environment variable" do
