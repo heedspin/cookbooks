@@ -24,10 +24,6 @@
 #
 ####################################
 
-if node[:ec2]
-  include_recipe "apt:ec2"
-end
-
 # 10-gen source for MongoDB
 if node[:mongo]
   template "/etc/apt/sources.list.d/mongo.list" do
@@ -52,4 +48,8 @@ e.run_action(:run)
     mode  0755
     action :create
   end
+end
+
+if node[:ec2]
+  include_recipe "apt::ec2"
 end
