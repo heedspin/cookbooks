@@ -13,8 +13,8 @@ default_unless[:rails][:aws_config_files] = []
 
 default_unless[:rails][:using_shared] = true
 
-if node[:rails][:using_shared]
-  default_unless[:rails][:db_directory] = "#{node[:app][:root_dir]}/shared"
+if node.rails.attribute?('using_shared')
+  default_unless[:rails][:db_directory] = "#{node[:rails][:app_root_dir]}/shared"
 else
-  default_unless[:rails][:db_directory] = "#{node[:app][:root_dir]}"
+  default_unless[:rails][:db_directory] = "#{node[:rails][:app_root_dir]}"
 end
