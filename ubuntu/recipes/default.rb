@@ -36,6 +36,14 @@ package "apache2-utils" do
   action :install
 end
 
+# nokogiri
+package "libxml2-dev" do
+  action :install
+end
+package "libxslt1-dev" do
+  action :install
+end
+
 package "vim" do
   action :install
 end
