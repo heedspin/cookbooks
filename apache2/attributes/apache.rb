@@ -77,11 +77,12 @@ default_unless[:apache][:worker][:threadsperchild] = 64
 default_unless[:apache][:worker][:maxrequestsperchild] = 0
 
 # Web App Attributes
-default_unless[:apache][:server_name] = ""  
+default_unless[:apache][:server_name]    = ""  
 default_unless[:apache][:server_aliases] = ""
-default_unless[:apache][:docroot] = "/var/www"
-default_unless[:apache][:name] = "site"
-default_unless[:apache][:vhost_port] = "80"
+default_unless[:apache][:docroot]        = "/var/www"
+default_unless[:apache][:name]           = "site"
+default_unless[:apache][:vhost_port]     = "80"
+default_unless[:apache][:vhosts]         = []
 
 # Log rotation
 default_unless[:apache][:logrotate][:interval] = 'daily'

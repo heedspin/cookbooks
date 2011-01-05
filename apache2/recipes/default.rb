@@ -159,19 +159,26 @@ template "#{node[:apache][:dir]}/ports.conf" do
   notifies :restart, resources(:service => "apache2")
 end
 
-template "#{node[:apache][:dir]}/sites-available/#{node[:apache][:name]}" do
-  source "web_app.conf.erb"
-  owner "root"
-  group "root"
-  mode 0644
-  variables({
-      :server_name    => node[:apache][:server_name],
-      :server_aliases => node[:apache][:server_aliases],
-      :docroot        => node[:apache][:docroot],
-      :name           => node[:apache][:name],
-      :vhost_port     => node[:apache][:vhost_port]
-    })
-  notifies :restart, resources(:service => "apache2")
+node[:apache][:vhosts].each do |vhost|
+  template "#{node[:apache][:dir]}/sites-available/#{vhost[:name]}" do
+    source "web_app.conf.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables({
+        :server_name    => vhost[:server_name],
+        :server_aliases => vhost[:server_aliases],
+        :docroot        => vhost[:docroot],
+        :name           => vhost[:name],
+        :vhost_port     => node[:apache][:vhost_port],
+        :apache_log_dir => node[:apache][:log_dir]
+      })
+    notifies :restart, resources(:service => "apache2")
+  end
+  
+  apache_site vhost[:name] do
+    action :enable
+  end
 end
 
 include_recipe "apache2::mod_status"
@@ -203,10 +210,6 @@ if node[:nginx][:varnish_proxy]
   end
 end
 
-apache_site node[:apache][:name] do
-  action :enable
-end
-
 file "/etc/apache2/sites-enabled/000-default" do
   action :delete
   notifies :reload, resources(:service => "apache2")
@@ -228,8 +231,6 @@ if node[:ec2] && (node[:chef][:roles].include?('staging') || node[:chef][:roles]
     group "root"
   end
 end
-
-
 
 service "apache2" do
   action :start
