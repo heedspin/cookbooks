@@ -182,13 +182,13 @@ if node[:ec2]
   end
 
   if node[:aws][:ebs][:backup]
-    if attribute?(:mysql)
+    if node.attribute?(:mysql)
       template "/etc/cron.d/ebs_backup" do
         variables :ebs_volume_id   => node[:aws][:ebs][:database][:volume_id],
                   :mysql_user      => 'root', 
                   :mysql_passwd    => node[:mysql][:server_root_password],
                   :xfs_mount_point => node[:aws][:ebs][:database][:mount_point],
-                  :description     => "ebs-backup-mysql-#{node[:apache][:name]}",
+                  :description     => "ebs-backup-mysql-#{node[:server][:name]}",
                   :log             => node[:ubuntu][:backup_log_dir]
         source "cron/roles/mysql/ebs_backup.erb"
         mode 0644
@@ -197,7 +197,7 @@ if node[:ec2]
       template "/etc/cron.d/ebs_backup" do
         variables :ebs_volume_id   => node[:aws][:ebs][:worker][:volume_id],
                   :xfs_mount_point => node[:aws][:ebs][:worker][:mount_point],
-                  :description     => "ebs-backup-#{node[:apache][:name]}",
+                  :description     => "ebs-backup-#{node[:server][:name]}",
                   :log             => node[:ubuntu][:backup_log_dir]
         source "cron/roles/standard/ebs_backup.erb"
         mode 0644
