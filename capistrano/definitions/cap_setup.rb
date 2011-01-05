@@ -26,40 +26,42 @@ define :cap_setup, :path => nil, :owner => "root", :group => "root", :appowner =
     mode 0755
     action :create
     recursive true
-    not_if do FileTest.directory?(params[:path]) end
+    not_if { File.directory?(params[:path]) }
   end
   
   # after chef-174 fixed, change mode to 2775
-  %w{ shared current }.each do |dir|
+  %w{ shared }.each do |dir|
     directory "#{params[:path]}/#{dir}" do
       owner params[:owner]
       group params[:group]
       mode 0775
       action :create
-      not_if do File.directory?("#{params[:path]}/#{dir}") end
+      not_if { File.directory?("#{params[:path]}/#{dir}") }
     end
   end
   
-  if node[:ec2] && node[:chef][:roles].include?('staging')
-    mount "#{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}/shared" do
-      device "/vol/apps/#{node[:apache][:name]}/shared"
+  if node[:ec2] && node[:chef][:roles].include?('app')
+    directory "/vol/apps/#{node[:app][:app_name]}/shared" do
+      owner params[:owner]
+      group params[:group]
+      mode 0775
+      action :create
+      recursive true
+      not_if { File.directory?("/vol/apps/#{node[:app][:app_name]}/shared") }
+    end
+    
+    mount "#{node[:app][:root_dir]}/shared" do
+      device "/vol/apps/#{node[:app][:app_name]}/shared"
       fstype "none"
       options "bind"
       action [:enable, :mount]
       # Do not execute if its already mounted (ubunutu/linux only)
-      not_if "cat /proc/mounts | grep #{node[:apache][:web_dir]}/apps/#{node[:apache][:name]}"
+      not_if "cat /proc/mounts | grep #{node[:app][:root_dir]}/shared"
     end
-
-    # we really only want to do this if it's not already owned...
-    # directory "#{params[:path]}/shared" do
-    #   owner params[:owner]
-    #   group params[:group]
-    #   mode 0775
-    # end
   end
   
   # create directories in shared
-  %w{ log config/initializers system data tmp db/sphinx/production }.each do |dir|
+  %w{ log config/initializers system data tmp/pids db/sphinx/production }.each do |dir|
     directory "#{params[:path]}/shared/#{dir}" do
       owner params[:appowner]
       group params[:group]
