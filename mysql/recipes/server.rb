@@ -118,3 +118,7 @@ execute "mysql-install-privileges" do
   action :nothing
   subscribes :run, resources(:template => "/etc/mysql/grants.sql"), :immediately
 end
+
+service "mysql" do
+  action :start
+end
