@@ -1,10 +1,28 @@
 # /etc/cron.d/ebs_backup: crontab fragment for backing up
 # mysql and other files on the attached EBS volume
-# This also removes the last 5 old snapshots from AWS
-
-# to snapshot your mysql && ebs file_system
-0 8 	* * *   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%> <%=@ebs_volume_id%> >> <%=@log%>  2>&1
-
-# Delete the last 5 old snapshots. (keeps 10)
+# This also removes all but the last 14 daily snapshots from AWS
 # This relies on .awssecret being present in /mnt and symlinked to /root/.awssecret (it should contain "aws_accesskey \n aws_secretkey")
-0 10 	* * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | sort -r -k 5  | sed 1,10d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
+
+# daily snapshot your mysql && ebs file_system
+0 8 	* * *   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%>-daily <%=@ebs_volume_id%> >> <%=@log%>  2>&1
+
+# Delete all but the last 14 daily snapshots
+0 10 	* * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | grep <%=@description%>-daily | sort -r -k 5  | sed 1,14d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
+
+
+# weekly snapshot your mysql && ebs file_system
+30 8 	* * 0   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%>-weekly <%=@ebs_volume_id%> >> <%=@log%>  2>&1
+
+# Delete all but the last 8 weekly snapshots
+30 10 	* * 0   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | grep <%=@description%>-weekly | sort -r -k 5  | sed 1,8d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
+
+
+# monthly snapshot your mysql && ebs file_system
+30 9 	1 * *   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%>-monthly <%=@ebs_volume_id%> >> <%=@log%>  2>&1
+
+# Delete all but the last 12 monthly snapshots
+30 11 	1 * *   root    /usr/local/sbin/aws dsnap | grep <%=@ebs_volume_id%> | grep <%=@description%>-monthly | sort -r -k 5  | sed 1,12d | awk '{print "Deleting snapshot: " $2 " Dated: " $8}; system("/usr/local/sbin/aws delsnap " $2)'  >> <%=@log%>  2>&1
+
+
+# quarterly snapshot your mysql && ebs file_system
+0 12 	1 1,4,7,10 *   root    /usr/bin/ec2-consistent-snapshot --mysql --mysql-username <%=@mysql_user%> --mysql-password <%=@mysql_passwd%> --xfs-filesystem <%=@xfs_mount_point%> --description <%=@description%>-quarterly <%=@ebs_volume_id%> >> <%=@log%>  2>&1
