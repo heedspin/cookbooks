@@ -171,7 +171,8 @@ node[:apache][:vhosts].each do |vhost|
         :docroot        => vhost[:docroot],
         :name           => vhost[:name],
         :vhost_port     => node[:apache][:vhost_port],
-        :apache_log_dir => node[:apache][:log_dir]
+        :apache_log_dir => node[:apache][:log_dir],
+        :rewrite_conditions => ""
       })
     notifies :restart, resources(:service => "apache2")
   end

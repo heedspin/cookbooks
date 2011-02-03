@@ -31,6 +31,8 @@
   RewriteEngine On
   RewriteLog <%= @apache_log_dir %>/<%= @name %>-rewrite.log
   RewriteLogLevel 0
+	
+	<%= @rewrite_conditions %>
 
   # Canonical host, <%= @server_name %>
   # RewriteCond %{HTTP_HOST}   !^<%= @server_name %> [NC]
