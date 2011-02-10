@@ -16,8 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-package "libmysqlclient15-dev"
+if node.platform_version.to_f > 8.04
+  package "libmysqlclient16-dev"
+else
+  package "libmysqlclient15-dev"
+end
 
 directory node[:sphinx][:src_path] do
   owner "root"

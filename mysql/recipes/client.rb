@@ -17,13 +17,24 @@
 # limitations under the License.
 #
 
-p = package "mysql-devel" do
-  package_name value_for_platform(
-    [ "centos", "redhat", "suse" ] => { "default" => "mysql-devel" },
-    "default" => 'libmysqlclient15-dev'
-  )
-  action :nothing
+if node.platform_version.to_f > 8.04
+  p = package "mysql-devel" do
+    package_name value_for_platform(
+      [ "centos", "redhat", "suse" ] => { "default" => "mysql-devel" },
+      "default" => 'libmysqlclient16-dev'
+    )
+    action :nothing
+  end
+else
+  p = package "mysql-devel" do
+    package_name value_for_platform(
+      [ "centos", "redhat", "suse" ] => { "default" => "mysql-devel" },
+      "default" => 'libmysqlclient15-dev'
+    )
+    action :nothing
+  end
 end
+
 
 p.run_action(:install)
 
@@ -44,7 +55,7 @@ if node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('app'
 
   else
     r = gem_package "mysql" do
-      version "2.7"
+      version "2.8"
       action :nothing
     end
 
