@@ -62,15 +62,18 @@ if platform?("ubuntu")
   end
 end
 
-service "mysql" do
-  service_name value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "mysqld"}, "default" => "mysql")
-  if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-    restart_command "restart mysql"
-    stop_command "stop mysql"
-    start_command "start mysql"
+if platform?("ubuntu") && node.platform_version.to_f >= 10.04
+  service "mysql" do
+    provider Chef::Provider::Service::Upstart
+    supports :status => true, :restart => true, :reload => true
+    action [ :enable, :start ]
   end
-  supports :status => true, :restart => true, :reload => true
-  action :nothing
+else
+  service "mysql" do
+    service_name value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "mysqld"}, "default" => "mysql")
+    supports :status => true, :restart => true, :reload => true
+    action :nothing
+  end
 end
 
 directory "/etc/mysql/conf.d" do
