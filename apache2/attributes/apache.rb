@@ -45,7 +45,7 @@ end
 ###
 
 # General settings
-default_unless[:apache][:listen_ports] = "80"#[ "80","443" ] Until Chef 0.9 arrays are merged here and not overwritten, see http://tickets.opscode.com/browse/CHEF-838
+default_unless[:apache][:listen_ports] = [ "80","443" ]
 default_unless[:apache][:contact] = "ops@example.com"
 default_unless[:apache][:timeout] = 300
 default_unless[:apache][:keepalive] = "On"
