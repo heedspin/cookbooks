@@ -19,7 +19,9 @@
 
 #include_recipe "ruby"
 
-include_recipe "rails::logrotate"
+unless node[:chef][:roles].include?('vagrant')
+  include_recipe "rails::logrotate"
+end
 
 %w{ rails actionmailer actionpack activerecord activesupport activeresource }.each do |rails_gem|
   gem_package rails_gem do
@@ -61,12 +63,14 @@ when 'mongoid'
   end
 end
 
-node[:rails][:aws_config_files].each do |file|
-  execute "Get private config file #{file}" do
-    cwd "#{node[:app][:root_dir]}/config"
-    command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:#{file} #{file}"
-    user "#{node[:capistrano][:deploy_user]}"
-    group "#{node[:capistrano][:deploy_user]}"
+if node[:ec2]
+  node[:rails][:aws_config_files].each do |file|
+    execute "Get private config file #{file}" do
+      cwd "#{node[:app][:root_dir]}/config"
+      command "#{node[:s3sync][:install_path]}/s3sync/s3cmd.rb get #{node[:ubuntu][:aws_config_path]}:#{file} #{file}"
+      user "#{node[:capistrano][:deploy_user]}"
+      group "#{node[:capistrano][:deploy_user]}"
+    end
   end
 end
 
