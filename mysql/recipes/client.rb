@@ -55,7 +55,7 @@ if node[:chef][:roles].include?('staging') || node[:chef][:roles].include?('app'
 
   else
     r = gem_package "mysql" do
-      version "2.8"
+      version "2.7"
       action :nothing
     end
 
