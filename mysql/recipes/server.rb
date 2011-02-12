@@ -92,8 +92,9 @@ template value_for_platform([ "centos", "redhat", "suse" ] => {"default" => "/et
 end
 
 begin
+  # I think we need to start mysql before loading the grants below.
   service "mysql" do
-    action :stop
+    action :start
   end
   t = resources(:template => "/etc/mysql/grants.sql")
 rescue
