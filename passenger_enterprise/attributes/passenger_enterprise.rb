@@ -31,3 +31,5 @@ default[:passenger_enterprise][:pool_idle_time] = 500
 default[:passenger_enterprise][:max_requests]   = 500 #TODO - this is prob too few?
 default[:passenger_enterprise][:max_pool_size]  = 10
 default[:passenger_enterprise][:global_cue] = 'off'
+
+default[:passenger_enterprise][:packages] = %w(apache2-threaded-dev libapr1-dev libaprutil1-dev)

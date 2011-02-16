@@ -26,7 +26,7 @@
 include_recipe "passenger_enterprise"
 # include_recipe "apache2"
 
-%w{ apache2-threaded-dev libapr1-dev libaprutil1-dev }.each do |pkg|
+node[:passenger_enterprise][:packages].each do |pkg|
   package pkg do
     action :install
   end
