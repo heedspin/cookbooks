@@ -1,9 +1,19 @@
-<%= @environment %>:
+development:
   adapter: mysql
   host: <%= @host %>
   port: <%= @port %>
-  database: <%= @database_name %>
+  database: <%= node[:app][:app_name] %>_development
   encoding: utf8
   reconnect: true
   username: root
-  password: <%= @password %>
+  password:
+
+test:
+  adapter: mysql
+  host: <%= @host %>
+  port: <%= @port %>
+  database: <%= node[:app][:app_name] %>_test
+  encoding: utf8
+  reconnect: true
+  username: root
+  password:
